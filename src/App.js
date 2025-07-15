@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
 function App() {
   const [originalImage, setOriginalImage] = useState(null);
@@ -8,6 +9,19 @@ function App() {
   const [compressedImageUrl, setCompressedImageUrl] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
   const [error, setError] = useState('');
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -90,63 +104,67 @@ function App() {
     (((originalImage.size - compressedImage.size) / originalImage.size) * 100).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
-        <header className="text-center mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800">画像圧縮ツール</h1>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex flex-col items-center justify-center p-4 font-sans transition-colors duration-300">
+      <div className="w-full max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 transition-colors duration-300">
+        <header className="flex items-center justify-between mb-8">
+          <div className="w-10"></div> {/* Spacer for balance */}
+          <h1 className="flex-1 text-center text-2xl sm:text-4xl md:text-5xl font-bold text-custom-blue mx-4">画像圧縮ツール</h1>
+          <button onClick={toggleTheme} className="flex-shrink-0 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-blue focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 transition-all duration-300">
+            {theme === 'dark' ? <FiSun className="w-5 h-5" /> : <FiMoon className="w-5 h-5" />}
+          </button>
         </header>
 
-        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">{error}</div>}
+        {error && <div className="bg-red-100 dark:bg-red-500/20 border border-red-400 dark:border-red-500 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg relative mb-6" role="alert">{error}</div>}
 
         {!originalImage && (
           <div 
-            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors" 
+            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-12 text-center cursor-pointer hover:border-custom-blue dark:hover:border-custom-blue hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300"
             onDragOver={onDragOver} 
             onDrop={onDrop}
             onClick={() => document.getElementById('fileInput').click()}
           >
             <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageUpload} />
-            <p className="text-gray-500">ここに画像をドラッグ＆ドロップ</p>
-            <p className="text-gray-400 my-2">または</p>
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">ここに画像をドラッグ＆ドロップ</p>
+            <p className="text-gray-400 dark:text-gray-500 my-3">または</p>
+            <button className="bg-custom-blue text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl">
               画像をアップロード
             </button>
           </div>
         )}
 
         {originalImage && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-2 text-gray-700">元の画像</h2>
-                <img src={originalImageUrl} alt="Original" className="rounded-lg shadow-md mx-auto max-h-80" />
-                <p className="mt-2 text-gray-600">元のサイズ: {formatBytes(originalImage.size)}</p>
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="text-center bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
+                <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">元の画像</h2>
+                <img src={originalImageUrl} alt="Original" className="rounded-lg shadow-lg mx-auto max-h-96" />
+                <p className="mt-4 text-gray-600 dark:text-gray-400">元のサイズ: {formatBytes(originalImage.size)}</p>
               </div>
-              <div className="text-center">
-                <h2 className="text-xl font-semibold mb-2 text-gray-700">圧縮後の画像</h2>
+              <div className="text-center bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
+                <h2 className="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-300">圧縮後の画像</h2>
                 {isCompressing ? (
-                  <div className="flex items-center justify-center h-full max-h-80 rounded-lg shadow-md bg-gray-200">
-                    <p className="text-gray-500">圧縮中...</p>
+                  <div className="flex items-center justify-center h-full max-h-96 rounded-lg shadow-lg bg-gray-200 dark:bg-gray-700">
+                    <p className="text-gray-500 dark:text-gray-400">圧縮中...</p>
                   </div>
                 ) : compressedImageUrl ? (
-                  <img src={compressedImageUrl} alt="Compressed" className="rounded-lg shadow-md mx-auto max-h-80" />
+                  <img src={compressedImageUrl} alt="Compressed" className="rounded-lg shadow-lg mx-auto max-h-96" />
                 ) : (
-                  <div className="flex items-center justify-center h-full max-h-80 rounded-lg shadow-md bg-gray-200">
-                    <p className="text-gray-500">圧縮待機中</p>
+                  <div className="flex items-center justify-center h-full max-h-96 rounded-lg shadow-lg bg-gray-200 dark:bg-gray-700">
+                    <p className="text-gray-500 dark:text-gray-400">圧縮待機中</p>
                   </div>
                 )}
-                {compressedImage && <p className="mt-2 text-gray-600">圧縮後のサイズ: {formatBytes(compressedImage.size)} (<span className="text-green-600 font-bold">▼{reductionPercentage}%削減</span>)</p>}
+                {compressedImage && <p className="mt-4 text-gray-600 dark:text-gray-400">圧縮後のサイズ: {formatBytes(compressedImage.size)} (<span className="text-green-500 dark:text-green-400 font-bold">▼{reductionPercentage}%削減</span>)</p>}
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button onClick={handleCompress} disabled={isCompressing || compressedImage} className="w-full sm:w-auto bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <button onClick={handleCompress} disabled={isCompressing || compressedImage} className="w-full sm:w-auto bg-custom-blue text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg">
                 {isCompressing ? '圧縮中...' : '圧縮する'}
               </button>
-              <button onClick={handleDownload} disabled={!compressedImage} className="w-full sm:w-auto bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+              <button onClick={handleDownload} disabled={!compressedImage} className="w-full sm:w-auto bg-custom-blue text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md hover:shadow-lg">
                 ダウンロード
               </button>
-              <button onClick={resetState} className="w-full sm:w-auto bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors">
+              <button onClick={resetState} className="w-full sm:w-auto bg-gray-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 transition-colors shadow-md hover:shadow-lg">
                 クリア
               </button>
             </div>
